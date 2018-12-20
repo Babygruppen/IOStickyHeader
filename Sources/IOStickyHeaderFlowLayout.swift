@@ -27,15 +27,19 @@ open class IOStickyHeaderFlowLayout: UICollectionViewFlowLayout {
   open override func prepare() {
     super.prepare()
   }
-
-  open override func initialLayoutAttributesForAppearingSupplementaryElement(ofKind elementKind: String, at elementIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-    let attributes = super.initialLayoutAttributesForAppearingSupplementaryElement(ofKind: elementKind, at: elementIndexPath)
-    var frame = attributes?.frame
-    frame!.origin.y += (self.parallaxHeaderReferenceSize?.height)!
-    attributes?.frame = frame!
     
-    return attributes
-  }
+    open override func initialLayoutAttributesForAppearingSupplementaryElement(ofKind elementKind: String, at elementIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        let attributes = super.initialLayoutAttributesForAppearingSupplementaryElement(ofKind: elementKind, at: elementIndexPath)
+        
+        guard var frame = attributes?.frame, let parallaxHeaderReferenceSizeHeight = self.parallaxHeaderReferenceSize?.height else {
+            return nil
+        }
+        
+        frame.origin.y += parallaxHeaderReferenceSizeHeight
+        attributes?.frame = frame
+        
+        return attributes
+    }
   
   open override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
     var attributes = super.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
