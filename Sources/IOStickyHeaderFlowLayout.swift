@@ -52,7 +52,10 @@ open class IOStickyHeaderFlowLayout: UICollectionViewFlowLayout {
   
   open override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
     var adjustedRec = rect
-    adjustedRec.origin.y -= (self.parallaxHeaderReferenceSize?.height)!
+    if let parallaxSize = self.parallaxHeaderReferenceSize {
+        adjustedRec.origin.y -= parallaxSize.height
+    }
+    
     
     let attributes = super.layoutAttributesForElements(in: adjustedRec)
     var allItems = [UICollectionViewLayoutAttributes]()
@@ -69,7 +72,10 @@ open class IOStickyHeaderFlowLayout: UICollectionViewFlowLayout {
     allItems.forEach { attributes in
       //    for attributes in allItems {
       var frame = attributes.frame
-      frame.origin.y += (self.parallaxHeaderReferenceSize?.height)!
+        if let parallaxSize = self.parallaxHeaderReferenceSize {
+            frame.origin.y += parallaxSize.height
+        }
+      
       attributes.frame = frame
       
       let indexPath = attributes.indexPath
@@ -96,36 +102,36 @@ open class IOStickyHeaderFlowLayout: UICollectionViewFlowLayout {
     if self.parallaxHeaderAlwaysOnTop == true {
       visibleParallaxHeader = true
     }
-    
-    if visibleParallaxHeader && !CGSize.zero.equalTo(self.parallaxHeaderReferenceSize!) {
-      let currentAttribute = IOStickyHeaderFlowLayoutAttributes(forSupplementaryViewOfKind: IOStickyHeaderParallaxHeader, with: IndexPath(index:0))
-      var frame = currentAttribute.frame
-      frame.size.width = (self.parallaxHeaderReferenceSize?.width)!
-      frame.size.height = (self.parallaxHeaderReferenceSize?.height)!
-      
-      let bounds = self.collectionView?.bounds
-      let maxY = frame.maxY
-      
-      var y = min(maxY - self.parallaxHeaderMinimumReferenceSize.height, (bounds?.origin.y)! + (self.collectionView?.contentInset.top)!)
-      let height = max(0, -y + maxY)
-      
-      
-      let maxHeight = self.parallaxHeaderReferenceSize!.height
-      let minHeight = self.parallaxHeaderMinimumReferenceSize.height
-      let progressiveness = (height - minHeight)/(maxHeight-minHeight)
-      currentAttribute.progressiveness = progressiveness
-      
-      currentAttribute.zIndex = 0
-      
-      if self.parallaxHeaderAlwaysOnTop && height <= self.parallaxHeaderMinimumReferenceSize.height {
-        let insertTop = self.collectionView?.contentInset.top
-        y = (self.collectionView?.contentOffset.y)! + insertTop!
-        currentAttribute.zIndex = 2000
-      }
-      
-      currentAttribute.frame = CGRect(x: frame.origin.x, y: y, width: frame.size.width, height: height)
-      allItems.append(currentAttribute)
+    if let parallaxSize = self.parallaxHeaderReferenceSize, visibleParallaxHeader && !CGSize.zero.equalTo(parallaxSize) {
+        let currentAttribute = IOStickyHeaderFlowLayoutAttributes(forSupplementaryViewOfKind: IOStickyHeaderParallaxHeader, with: IndexPath(index:0))
+        var frame = currentAttribute.frame
+        frame.size.width = parallaxSize.width
+        frame.size.height = parallaxSize.height
+        
+        let bounds = self.collectionView?.bounds
+        let maxY = frame.maxY
+        
+        var y = min(maxY - self.parallaxHeaderMinimumReferenceSize.height, (bounds?.origin.y)! + (self.collectionView?.contentInset.top)!)
+        let height = max(0, -y + maxY)
+        
+        
+        let maxHeight = parallaxSize.height
+        let minHeight = self.parallaxHeaderMinimumReferenceSize.height
+        let progressiveness = (height - minHeight)/(maxHeight-minHeight)
+        currentAttribute.progressiveness = progressiveness
+        
+        currentAttribute.zIndex = 0
+        
+        if self.parallaxHeaderAlwaysOnTop && height <= self.parallaxHeaderMinimumReferenceSize.height {
+            let insertTop = self.collectionView?.contentInset.top
+            y = (self.collectionView?.contentOffset.y)! + insertTop!
+            currentAttribute.zIndex = 2000
+        }
+        
+        currentAttribute.frame = CGRect(x: frame.origin.x, y: y, width: frame.size.width, height: height)
+        allItems.append(currentAttribute)
     }
+    
     
     if !self.disableStickyHeaders {
       lastCells.keyEnumerator().forEach { obj in
@@ -152,7 +158,10 @@ open class IOStickyHeaderFlowLayout: UICollectionViewFlowLayout {
   open override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
     if let attributes = super.layoutAttributesForItem(at: indexPath)?.copy() as? UICollectionViewLayoutAttributes {
       var frame = attributes.frame
-      frame.origin.y += (self.parallaxHeaderReferenceSize?.height)!
+    if let parallaxSize = self.parallaxHeaderReferenceSize {
+        frame.origin.y += parallaxSize.height
+    }
+      
       attributes.frame = frame
       return attributes
     } else {
@@ -166,7 +175,10 @@ open class IOStickyHeaderFlowLayout: UICollectionViewFlowLayout {
     }
     
     var size = super.collectionViewContentSize
-    size.height += (self.parallaxHeaderReferenceSize?.height)!
+    guard let parallaxSize = self.parallaxHeaderReferenceSize else {
+        return size
+    }
+    size.height += parallaxSize.height
     return size
   }
   
